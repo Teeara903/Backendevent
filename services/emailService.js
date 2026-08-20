@@ -1,15 +1,6 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
-  family: 4,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendInvitationEmail = async ({
   guestName,
@@ -17,9 +8,9 @@ const sendInvitationEmail = async ({
   coupleNames,
   invitationLink,
 }) => {
-  await transporter.sendMail({
-    from: `"Wedding Event Manager" <${process.env.EMAIL_USER}>`,
-    to: guestEmail,
+  const { data, error } = await resend.emails.send({
+    from: "Wedding Event Manager <onboarding@resend.dev>",
+    to: [guestEmail],
     subject: `💍 You're Invited to ${coupleNames}'s Wedding`,
     html: `
       <div style="
@@ -85,6 +76,13 @@ const sendInvitationEmail = async ({
       </div>
     `,
   });
+
+  if (error) {
+    console.error("RESEND EMAIL ERROR:", error);
+    throw new Error(error.message);
+  }
+
+  console.log("INVITATION EMAIL SENT:", data);
 };
 
 module.exports = {
