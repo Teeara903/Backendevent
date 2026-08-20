@@ -3,12 +3,13 @@ const cloudinary = require("../config/cloudinary");
 
 const createWedding = async (req, res) => {
   try {
-    const { coupleNames, story, weddingDate, venue } = req.body;
+    const { coupleNames, story, howWeMet, weddingDate, venue } = req.body;
 
     const wedding = new Wedding({
       owner: req.user.id,
       coupleNames,
       story,
+      howWeMet,
       weddingDate,
       venue,
     });
@@ -58,6 +59,7 @@ const updateWedding = async (req, res) => {
 
     wedding.coupleNames = req.body.coupleNames || wedding.coupleNames;
     wedding.story = req.body.story || wedding.story;
+    wedding.howWeMet = req.body.howWeMet || wedding.howWeMet;
     wedding.weddingDate = req.body.weddingDate || wedding.weddingDate;
     wedding.venue = req.body.venue || wedding.venue;
 
@@ -230,6 +232,48 @@ const getPublicWedding = async (req, res) => {
     });
   }
 };
+const updateTheme = async (req, res) => {
+  try {
+    const { theme } = req.body;
+
+    const wedding = await Wedding.findById(req.params.id);
+
+    if (!wedding) {
+      return res.status(404).json({
+        message: "Wedding not found",
+      });
+    }
+
+    // Make sure only the couple who owns the wedding can change its theme
+    if (wedding.owner.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "Not authorized to change this wedding theme",
+      });
+    }
+
+    // Allowed themes
+    const allowedThemes = ["garden", "luxury", "minimal", "romantic", "royal"];
+
+    if (!allowedThemes.includes(theme)) {
+      return res.status(400).json({
+        message: "Invalid theme selected",
+      });
+    }
+
+    wedding.theme = theme;
+
+    await wedding.save();
+
+    res.status(200).json({
+      message: "Theme updated successfully",
+      wedding,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   createWedding,
   getMyWeddings,
@@ -239,4 +283,5 @@ module.exports = {
   uploadGallery,
   deleteGalleryImage,
   getPublicWedding,
+  updateTheme,
 };

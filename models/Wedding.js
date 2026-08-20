@@ -16,7 +16,9 @@ const weddingSchema = new mongoose.Schema(
     story: {
       type: String,
     },
-
+    howWeMet: {
+      type: String,
+    },
     weddingDate: {
       type: Date,
       required: true,
@@ -32,6 +34,11 @@ const weddingSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    theme: {
+      type: String,
+      enum: ["garden", "luxury", "minimal", "romantic", "royal"],
+      default: "romantic",
+    },
   },
   {
     timestamps: true,
