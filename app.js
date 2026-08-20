@@ -14,7 +14,12 @@ const seatingRoutes = require("./routes/seatingRoutes");
 
 connectDB();
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://weddingyear.netlify.app"],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/guests", guestRoutes);
